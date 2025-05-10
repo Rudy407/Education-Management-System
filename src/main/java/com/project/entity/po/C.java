@@ -1,8 +1,6 @@
-package com.easyjava.entity.po;
+package com.project.entity.po;
 
 import java.io.Serializable;
-
-
 
 
 /**
