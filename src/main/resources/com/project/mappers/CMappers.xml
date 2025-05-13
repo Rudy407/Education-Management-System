@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.mappers.CMappers">
+
+	<!-- 结果映射 -->
+	<resultMap id="base_result_map" type="com.project.entity.po.C">
+		<result column="kh" property="kh"/>
+		<result column="km" property="km"/>
+		<result column="xf" property="xf"/>
+		<result column="xs" property="xs"/>
+		<result column="yxh" property="yxh"/>
+	</resultMap>
+
+	<!-- 基本字段列表 -->
+	<sql id="base_column_list">
+		kh, km, xf, xs, yxh
+	</sql>
+
+	<!-- 基本查询条件 -->
+	<sql id="base_query_condition">
+		<if test="query.kh!=null and query.kh!=''">
+			and kh = #{query.kh}
+		</if>
+		<if test="query.km!=null and query.km!=''">
+			and km = #{query.km}
+		</if>
+		<if test="query.xf!=null">
+			and xf = #{query.xf}
+		</if>
+		<if test="query.xs!=null">
+			and xs = #{query.xs}
+		</if>
+		<if test="query.yxh!=null and query.yxh!=''">
+			and yxh = #{query.yxh}
+		</if>
+	</sql>
+
+	<!-- 扩展查询条件（模糊查询） -->
+	<sql id="base_query_condition_extend">
+		<if test="query.khFuzzy != null and query.khFuzzy!=''">
+			and kh like concat('%', #{query.khFuzzy}, '%')
+		</if>
+		<if test="query.kmFuzzy != null and query.kmFuzzy!=''">
+			and km like concat('%', #{query.kmFuzzy}, '%')
+		</if>
+		<if test="query.yxhFuzzy != null and query.yxhFuzzy!=''">
+			and yxh like concat('%', #{query.yxhFuzzy}, '%')
+		</if>
+	</sql>
+
+	<!-- 综合查询条件 -->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+
+	<!-- 查询列表 -->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT <include refid="base_column_list"/> FROM c
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">order by ${query.orderBy}</if>
+		<if test="query.simplePage!=null">limit #{query.simplePage.start},#{query.simplePage.end}</if>
+		<if test="query.simplePage!=null">limit #{query.pageSize} offset #{query.pageStart}</if>
+	</select>
+
+	<!-- 查询总数 -->
+	<select id="selectCount" resultType="integer">
+		SELECT count(1) FROM c <include refid="query_condition"/>
+	</select>
+
+	<!-- 单条插入 -->
+	<insert id="insert" parameterType="com.project.entity.po.C">
+		INSERT INTO c
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.kh!=null">kh,</if>
+			<if test="bean.km!=null">km,</if>
+			<if test="bean.xf!=null">xf,</if>
+			<if test="bean.xs!=null">xs,</if>
+			<if test="bean.yxh!=null">yxh,</if>
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+			<if test="bean.kh!=null">#{bean.kh},</if>
+			<if test="bean.km!=null">#{bean.km},</if>
+			<if test="bean.xf!=null">#{bean.xf},</if>
+			<if test="bean.xs!=null">#{bean.xs},</if>
+			<if test="bean.yxh!=null">#{bean.yxh},</if>
+		</trim>
+	</insert>
+
+	<!-- 单条插入或更新 -->
+	<update id="mergeIntoC" parameterType="com.project.entity.po.C">
+		MERGE INTO c USING (
+		<trim prefix="SELECT" suffixOverrides=",">
+			<if test="kh != null">#{kh} AS kh,</if>
+			<if test="km != null">#{km} AS km,</if>
+			<if test="xf != null">#{xf} AS xf,</if>
+			<if test="xs != null">#{xs} AS xs,</if>
+			<if test="yxh != null">#{yxh} AS yxh,</if>
+		</trim>
+		) t ON (c.kh = t.kh)
+		WHEN MATCHED THEN UPDATE SET
+		<trim suffixOverrides=",">
+			<if test="km != null">km = t.km,</if>
+			<if test="xf != null">xf = t.xf,</if>
+			<if test="xs != null">xs = t.xs,</if>
+			<if test="yxh != null">yxh = t.yxh,</if>
+		</trim>
+		WHEN NOT MATCHED THEN INSERT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="kh != null">kh,</if>
+			<if test="km != null">km,</if>
+			<if test="xf != null">xf,</if>
+			<if test="xs != null">xs,</if>
+			<if test="yxh != null">yxh,</if>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="kh != null">t.kh,</if>
+			<if test="km != null">t.km,</if>
+			<if test="xf != null">t.xf,</if>
+			<if test="xs != null">t.xs,</if>
+			<if test="yxh != null">t.yxh,</if>
+		</trim>
+	</update>
+
+	<!-- 批量插入 -->
+	<insert id="insertBatch" parameterType="com.project.entity.po.C">
+		INSERT INTO c(kh, km, xf, xs, yxh) VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.kh}, #{item.km}, #{item.xf}, #{item.xs}, #{item.yxh})
+		</foreach>
+	</insert>
+
+	<!-- 批量插入或更新 -->
+	<update id="insertOrUpdateBatch" parameterType="java.util.List">
+		<foreach collection="list" item="item" separator=";">
+			MERGE INTO c USING (
+			SELECT
+			#{item.kh} AS kh,
+			#{item.km} AS km,
+			#{item.xf} AS xf,
+			#{item.xs} AS xs,
+			#{item.yxh} AS yxh
+			) t
+			ON (c.kh = t.kh)
+			WHEN MATCHED THEN UPDATE SET
+			km = t.km,
+			xf = t.xf,
+			xs = t.xs,
+			yxh = t.yxh
+			WHEN NOT MATCHED THEN INSERT (
+			kh, km, xf, xs, yxh
+			) VALUES (
+			t.kh, t.km, t.xf, t.xs, t.yxh
+			)
+		</foreach>
+	</update>
+
+
+
+	<!-- 根据主键查询 -->
+	<select id="selectByKh" resultMap="base_result_map">
+		SELECT <include refid="base_column_list"/> FROM c WHERE kh=#{kh}
+	</select>
+
+	<!-- 根据主键更新 -->
+	<update id="updateByKh" parameterType="com.project.entity.po.C">
+		UPDATE c
+		<set>
+			<if test="bean.km!=null">km = #{bean.km},</if>
+			<if test="bean.xf!=null">xf = #{bean.xf},</if>
+			<if test="bean.xs!=null">xs = #{bean.xs},</if>
+			<if test="bean.yxh!=null">yxh = #{bean.yxh},</if>
+		</set>
+		WHERE kh=#{kh}
+	</update>
+
+	<!-- 根据主键删除 -->
+	<delete id="deleteByKh">
+		DELETE FROM c WHERE kh=#{kh}
+	</delete>
+
+	<!-- 根据查询条件更新 -->
+	<update id="updateByParam" parameterType="com.project.entity.query.CQuery">
+		UPDATE c
+		<set>
+			<if test="bean.kh!=null">kh = #{bean.kh},</if>
+			<if test="bean.km!=null">km = #{bean.km},</if>
+			<if test="bean.xf!=null">xf = #{bean.xf},</if>
+			<if test="bean.xs!=null">xs = #{bean.xs},</if>
+			<if test="bean.yxh!=null">yxh = #{bean.yxh},</if>
+		</set>
+		<include refid="query_condition"/>
+	</update>
+
+</mapper>

@@ -1,5 +1,7 @@
 server:
   port: 10086
+  servlet:
+    context-path: /api
 
 spring:
   datasource:
@@ -7,3 +9,8 @@ spring:
     username: test
     password: Shujuku813
     driver-class-name: org.opengauss.Driver
+
+mybatis:
+  mapper-locations: classpath*:com/project/mappers/*.xml
+  type-aliases-package: com.project.entity.po
+

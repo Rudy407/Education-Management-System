@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!-- 添加 Spring Boot 官方父项目，统一管理依赖版本 -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.6.1</version>
+        <relativePath/>
+    </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.example</groupId>
+    <groupId>com.project</groupId>
     <artifactId>minimal-app</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -18,29 +27,23 @@
         <springboot.version>2.6.1</springboot.version> <!-- Spring Boot 版本 -->
         <logback.version>1.2.10</logback.version>
         <commons.lang3.version>3.4</commons.lang3.version>
+        <mybatis.version>2.2.0</mybatis.version> <!-- 使用 mybatis-spring-boot-starter 最新适配版本 -->
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <!-- Spring Boot BOM, 自动管理所有 Spring Boot 相关依赖的版本 -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${springboot.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!-- OpenGauss JDBC 驱动 -->
         <dependency>
             <groupId>org.opengauss</groupId>
             <artifactId>opengauss-jdbc</artifactId>
-            <version>7.0.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/opengauss-jdbc-7.0.0-RC1.jar</systemPath>
+            <version>7.0.0-RC1</version>
+            <!--maven强制全部刷新后，需要重新本地安装该驱动 -->
+            <!--            安装opengauss驱动到本地maven仓库， 更改路径在CMD执行以下命令（powershell无法执行）-->
+            <!--     ${project.basedir} 必须改成绝对路径！！！！！！！        -->
+            <!--                -->
+            <!--            mvn install:install-file -Dfile=${project.basedir}/src/main/resources/lib/opengauss-jdbc-7.0.0-RC1.jar -DgroupId=org.opengauss -DartifactId=opengauss-jdbc -Dversion=7.0.0-RC1 -Dpackaging=jar-->
+
+            <!--            <scope>system</scope>-->
+            <!--            <systemPath>${project.basedir}/src/main/resources/lib/opengauss-jdbc-7.0.0-RC1.jar</systemPath>-->
         </dependency>
 
         <!-- Spring Boot Web Starter -->
@@ -85,6 +88,13 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons.lang3.version}</version>
+        </dependency>
+
+        <!--mybatis-->
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>${mybatis.version}</version>
         </dependency>
     </dependencies>
 
