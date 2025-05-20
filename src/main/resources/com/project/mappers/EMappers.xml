@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.mappers.EMappers">
+	<!-- entity map -->
+	<resultMap id="base_result_map" type="com.project.entity.po.E">
+		<!-- 学号 -->
+		<result column="xh" property="xh"/>
+		<!-- 学期 -->
+		<result column="xq" property="xq"/>
+		<!-- 课号 -->
+		<result column="kh" property="kh"/>
+		<!-- 工号 -->
+		<result column="gh" property="gh"/>
+		<!-- 成绩 -->
+		<result column="cj" property="cj"/>
+	</resultMap>
+
+	<!-- general query list -->
+	<sql id="base_column_list">
+		xh,xq,kh,gh,cj
+	</sql>
+
+	<!--Basic Query Condition-->
+	<sql id="base_query_condition">
+		<if test="query.xh!=null and query.xh!=''">
+			and xh = #{query.xh}
+		</if>
+		<if test="query.xq!=null and query.xq!=''">
+			and xq = #{query.xq}
+		</if>
+		<if test="query.kh!=null and query.kh!=''">
+			and kh = #{query.kh}
+		</if>
+		<if test="query.gh!=null and query.gh!=''">
+			and gh = #{query.gh}
+		</if>
+		<if test="query.cj!=null">
+			and cj = #{query.cj}
+		</if>
+	</sql>
+
+	<!--Extend Query Condition-->
+	<sql id="base_query_condition_extend">
+		<if test="query.xhFuzzy != null and query.xhFuzzy!=''">
+			and xh like concat('%', #{query.xhFuzzy}, '%')
+		</if>
+		<if test="query.xqFuzzy != null and query.xqFuzzy!=''">
+			and xq like concat('%', #{query.xqFuzzy}, '%')
+		</if>
+		<if test="query.khFuzzy != null and query.khFuzzy!=''">
+			and kh like concat('%', #{query.khFuzzy}, '%')
+		</if>
+		<if test="query.ghFuzzy != null and query.ghFuzzy!=''">
+			and gh like concat('%', #{query.ghFuzzy}, '%')
+		</if>
+	</sql>
+	<!-- 通用的查询条件 -->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+
+	<select id="selectList" resultMap="base_result_map">
+		SELECT <include refid="base_column_list"/> FROM e
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+		<if test="query.orderBy!=null">order by ${query.orderBy}</if>
+		<if test="query.simplePage!=null">limit #{query.simplePage.countTotal} offset #{query.simplePage.start}</if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="integer">
+		SELECT count(1) FROM e <include refid="query_condition"/>
+	</select>
+
+	<!-- 插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.project.entity.po.E">
+		INSERT INTO e
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.xh!=null">
+				xh,
+			</if>
+			<if test="bean.xq!=null">
+				xq,
+			</if>
+			<if test="bean.kh!=null">
+				kh,
+			</if>
+			<if test="bean.gh!=null">
+				gh,
+			</if>
+			<if test="bean.cj!=null">
+				cj,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.xh!=null">
+				#{bean.xh},
+			</if>
+			<if test="bean.xq!=null">
+				#{bean.xq},
+			</if>
+			<if test="bean.kh!=null">
+				#{bean.kh},
+			</if>
+			<if test="bean.gh!=null">
+				#{bean.gh},
+			</if>
+			<if test="bean.cj!=null">
+				#{bean.cj},
+			</if>
+		</trim>
+	</insert>
+
+	<!-- opengauss start -->
+	<!-- 插入或更新（兼容OpenGauss/PostgreSQL MERGE语法）-->
+	<update id="insertOrUpdate" parameterType="com.project.entity.po.E">
+		MERGE INTO e USING (
+			<trim prefix="SELECT" suffixOverrides=",">
+				<if test="bean.xh != null">
+					#{bean.xh} AS xh,
+				</if>
+				<if test="bean.xq != null">
+					#{bean.xq} AS xq,
+				</if>
+				<if test="bean.kh != null">
+					#{bean.kh} AS kh,
+				</if>
+				<if test="bean.gh != null">
+					#{bean.gh} AS gh,
+				</if>
+				<if test="bean.cj != null">
+					#{bean.cj} AS cj,
+				</if>
+			</trim>
+		) t ON (e.kh = t.kh)
+		WHEN MATCHED THEN UPDATE SET
+			<trim suffixOverrides=",">
+				<if test="bean.xh != null">
+					xh = t.xh,
+				</if>
+				<if test="bean.xq != null">
+					xq = t.xq,
+				</if>
+				<if test="bean.gh != null">
+					gh = t.gh,
+				</if>
+				<if test="bean.cj != null">
+					cj = t.cj,
+				</if>
+			</trim>
+		WHEN NOT MATCHED THEN INSERT
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="bean.xh != null">
+					xh,
+				</if>
+				<if test="bean.xq != null">
+					xq,
+				</if>
+				<if test="bean.kh != null">
+					kh,
+				</if>
+				<if test="bean.gh != null">
+					gh,
+				</if>
+				<if test="bean.cj != null">
+					cj,
+				</if>
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="bean.xh != null">
+					t.xh,
+				</if>
+				<if test="bean.xq != null">
+					t.xq,
+				</if>
+				<if test="bean.kh != null">
+					t.kh,
+				</if>
+				<if test="bean.gh != null">
+					t.gh,
+				</if>
+				<if test="bean.cj != null">
+					t.cj,
+				</if>
+			</trim>
+	</update>
+	<!-- opengauss end-->
+
+	<!-- 批量插入 -->
+	<insert id="insertBatch" parameterType="com.project.entity.po.E">
+		INSERT INTO e(xh,xq,kh,gh,cj) values
+		<foreach collection="list" item="item" separator="," open="(" close=")">
+			#{item.xh},#{item.xq},#{item.kh},#{item.gh},#{item.cj}
+		</foreach>
+	</insert>
+
+	<!-- opengauss start -->	<!-- 批量插入或更新 -->
+	<update id="insertOrUpdateBatch" parameterType="java.util.List">
+		<foreach collection="list" item="item" separator=";">
+			MERGE INTO e USING (
+			SELECT
+				#{item.xh} AS xh,
+				#{item.xq} AS xq,
+				#{item.kh} AS kh,
+				#{item.gh} AS gh,
+				#{item.cj} AS cj,
+			) t
+			ON (e.kh = t.kh)
+			WHEN MATCHED THEN UPDATE SET
+				xh = t.xh,
+				xq = t.xq,
+				gh = t.gh,
+				cj = t.cj,
+			WHEN NOT MATCHED THEN INSERT (
+				xh, xq, kh, gh, cj
+			) VALUES (
+				t.xh, t.xq, t.kh, t.gh, t.cj
+			)
+		</foreach>
+	</update>
+	<!-- opengauss end -->
+
+
+	<!--According XhAndXqAndKhAndGh select-->
+	<select id="selectByXhAndXqAndKhAndGh" resultMap="base_result_map">
+		select <include refid="base_column_list"/> from e where xh=#{xh} And xq=#{xq} And kh=#{kh} And gh=#{gh}
+	</select>
+
+	<!--According XhAndXqAndKhAndGh update-->
+	<update id="updateByXhAndXqAndKhAndGh" parameterType="com.project.entity.po.E">
+		update e
+		<set>
+			<if test="bean.xh!= null">
+				xh = #{bean.xh},
+			</if>
+			<if test="bean.xq!= null">
+				xq = #{bean.xq},
+			</if>
+			<if test="bean.kh!= null">
+				kh = #{bean.kh},
+			</if>
+			<if test="bean.gh!= null">
+				gh = #{bean.gh},
+			</if>
+			<if test="bean.cj!= null">
+				cj = #{bean.cj},
+			</if>
+		</set>
+		where xh=#{xh} And xq=#{xq} And kh=#{kh} And gh=#{gh}
+	</update>
+
+	<!--According XhAndXqAndKhAndGh delete-->
+	<delete id="deleteByXhAndXqAndKhAndGh">
+		delete from e where xh=#{xh} And xq=#{xq} And kh=#{kh} And gh=#{gh}
+	</delete>
+
+
+
+	<!-- According to any params update -->
+	<update id="updateByParam" parameterType="com.project.entity.query.EQuery">
+		UPDATE e
+		<set>
+			<if test="bean.xh!=null">
+				xh = #{bean.xh},
+			</if>
+			<if test="bean.xq!=null">
+				xq = #{bean.xq},
+			</if>
+			<if test="bean.kh!=null">
+				kh = #{bean.kh},
+			</if>
+			<if test="bean.gh!=null">
+				gh = #{bean.gh},
+			</if>
+			<if test="bean.cj!=null">
+				cj = #{bean.cj},
+			</if>
+		</set>
+		<include refid="query_condition"/>
+ 	</update>
+</mapper>

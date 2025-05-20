@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.mappers.NoticeMappers">
+	<!-- entity map -->
+	<resultMap id="base_result_map" type="com.project.entity.po.Notice">
+		<!-- null -->
+		<result column="id" property="id"/>
+		<!-- 公告标题 -->
+		<result column="title" property="title"/>
+		<!-- 班级ID -->
+		<result column="group_id" property="groupId"/>
+		<!-- 公告内容 -->
+		<result column="notice_content" property="noticeContent"/>
+		<!-- null -->
+		<result column="create_time" property="createTime"/>
+		<!-- null -->
+		<result column="update_time" property="updateTime"/>
+		<!-- null -->
+		<result column="status" property="status"/>
+	</resultMap>
+
+	<!-- general query list -->
+	<sql id="base_column_list">
+		id,title,group_id,notice_content,create_time,update_time,status
+	</sql>
+
+	<!--Basic Query Condition-->
+	<sql id="base_query_condition">
+		<if test="query.id!=null">
+			and id = #{query.id}
+		</if>
+		<if test="query.title!=null and query.title!=''">
+			and title = #{query.title}
+		</if>
+		<if test="query.groupId!=null and query.groupId!=''">
+			and group_id = #{query.groupId}
+		</if>
+		<if test="query.noticeContent!=null and query.noticeContent!=''">
+			and notice_content = #{query.noticeContent}
+		</if>
+		<if test="query.createTime!=null">
+			and create_time = #{query.createTime}
+		</if>
+		<if test="query.updateTime!=null">
+			and update_time = #{query.updateTime}
+		</if>
+		<if test="query.status!=null and query.status!=''">
+			and status = #{query.status}
+		</if>
+	</sql>
+
+	<!--Extend Query Condition-->
+	<sql id="base_query_condition_extend">
+		<if test="query.titleFuzzy != null and query.titleFuzzy!=''">
+			and title like concat('%', #{query.titleFuzzy}, '%')
+		</if>
+		<if test="query.groupIdFuzzy != null and query.groupIdFuzzy!=''">
+			and group_id like concat('%', #{query.groupIdFuzzy}, '%')
+		</if>
+		<if test="query.noticeContentFuzzy != null and query.noticeContentFuzzy!=''">
+			and notice_content like concat('%', #{query.noticeContentFuzzy}, '%')
+		</if>
+		<if test="query.createTimeStart != null and query.createTimeStart!=''">
+			<![CDATA[ and create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.createTimeEnd != null and query.createTimeEnd!=''">
+			<![CDATA[ and create_time < date_sub(str_to_date(#{query.createTimeEnd},'%Y-%m-%d'),interval -1 day) ]]>
+		</if>
+		<if test="query.updateTimeStart != null and query.updateTimeStart!=''">
+			<![CDATA[ and update_time >= str_to_date(#{query.updateTimeStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.updateTimeEnd != null and query.updateTimeEnd!=''">
+			<![CDATA[ and update_time < date_sub(str_to_date(#{query.updateTimeEnd},'%Y-%m-%d'),interval -1 day) ]]>
+		</if>
+		<if test="query.statusFuzzy != null and query.statusFuzzy!=''">
+			and status like concat('%', #{query.statusFuzzy}, '%')
+		</if>
+	</sql>
+	<!-- 通用的查询条件 -->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+
+	<select id="selectList" resultMap="base_result_map">
+		SELECT <include refid="base_column_list"/> FROM notice
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+		<if test="query.orderBy!=null">order by ${query.orderBy}</if>
+		<if test="query.simplePage!=null">limit #{query.simplePage.countTotal} offset #{query.simplePage.start}</if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="integer">
+		SELECT count(1) FROM notice <include refid="query_condition"/>
+	</select>
+
+	<!-- 插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.project.entity.po.Notice">
+		INSERT INTO notice
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				id,
+			</if>
+			<if test="bean.title!=null">
+				title,
+			</if>
+			<if test="bean.groupId!=null">
+				group_id,
+			</if>
+			<if test="bean.noticeContent!=null">
+				notice_content,
+			</if>
+			<if test="bean.createTime!=null">
+				create_time,
+			</if>
+			<if test="bean.updateTime!=null">
+				update_time,
+			</if>
+			<if test="bean.status!=null">
+				status,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				#{bean.id},
+			</if>
+			<if test="bean.title!=null">
+				#{bean.title},
+			</if>
+			<if test="bean.groupId!=null">
+				#{bean.groupId},
+			</if>
+			<if test="bean.noticeContent!=null">
+				#{bean.noticeContent},
+			</if>
+			<if test="bean.createTime!=null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.updateTime!=null">
+				#{bean.updateTime},
+			</if>
+			<if test="bean.status!=null">
+				#{bean.status},
+			</if>
+		</trim>
+	</insert>
+
+	<!-- opengauss start -->
+	<!-- 插入或更新（兼容OpenGauss/PostgreSQL MERGE语法）-->
+	<update id="insertOrUpdate" parameterType="com.project.entity.po.Notice">
+		MERGE INTO notice USING (
+			<trim prefix="SELECT" suffixOverrides=",">
+				<if test="bean.id != null">
+					#{bean.id} AS id,
+				</if>
+				<if test="bean.title != null">
+					#{bean.title} AS title,
+				</if>
+				<if test="bean.groupId != null">
+					#{bean.groupId} AS group_id,
+				</if>
+				<if test="bean.noticeContent != null">
+					#{bean.noticeContent} AS notice_content,
+				</if>
+				<if test="bean.createTime != null">
+					#{bean.createTime} AS create_time,
+				</if>
+				<if test="bean.updateTime != null">
+					#{bean.updateTime} AS update_time,
+				</if>
+				<if test="bean.status != null">
+					#{bean.status} AS status,
+				</if>
+			</trim>
+		) t ON (notice.kh = t.kh)
+		WHEN MATCHED THEN UPDATE SET
+			<trim suffixOverrides=",">
+				<if test="bean.id != null">
+					id = t.id,
+				</if>
+				<if test="bean.title != null">
+					title = t.title,
+				</if>
+				<if test="bean.groupId != null">
+					group_id = t.group_id,
+				</if>
+				<if test="bean.noticeContent != null">
+					notice_content = t.notice_content,
+				</if>
+				<if test="bean.createTime != null">
+					create_time = t.create_time,
+				</if>
+				<if test="bean.updateTime != null">
+					update_time = t.update_time,
+				</if>
+				<if test="bean.status != null">
+					status = t.status,
+				</if>
+			</trim>
+		WHEN NOT MATCHED THEN INSERT
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="bean.id != null">
+					id,
+				</if>
+				<if test="bean.title != null">
+					title,
+				</if>
+				<if test="bean.groupId != null">
+					group_id,
+				</if>
+				<if test="bean.noticeContent != null">
+					notice_content,
+				</if>
+				<if test="bean.createTime != null">
+					create_time,
+				</if>
+				<if test="bean.updateTime != null">
+					update_time,
+				</if>
+				<if test="bean.status != null">
+					status,
+				</if>
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="bean.id != null">
+					t.id,
+				</if>
+				<if test="bean.title != null">
+					t.title,
+				</if>
+				<if test="bean.groupId != null">
+					t.group_id,
+				</if>
+				<if test="bean.noticeContent != null">
+					t.notice_content,
+				</if>
+				<if test="bean.createTime != null">
+					t.create_time,
+				</if>
+				<if test="bean.updateTime != null">
+					t.update_time,
+				</if>
+				<if test="bean.status != null">
+					t.status,
+				</if>
+			</trim>
+	</update>
+	<!-- opengauss end-->
+
+	<!-- 批量插入 -->
+	<insert id="insertBatch" parameterType="com.project.entity.po.Notice">
+		INSERT INTO notice(title,group_id,notice_content,create_time,update_time,status) values
+		<foreach collection="list" item="item" separator="," open="(" close=")">
+			#{item.title},#{item.groupId},#{item.noticeContent},#{item.createTime},#{item.updateTime},#{item.status}
+		</foreach>
+	</insert>
+
+	<!-- opengauss start -->	<!-- 批量插入或更新 -->
+	<update id="insertOrUpdateBatch" parameterType="java.util.List">
+		<foreach collection="list" item="item" separator=";">
+			MERGE INTO notice USING (
+			SELECT
+				#{item.title} AS title,
+				#{item.groupId} AS group_id,
+				#{item.noticeContent} AS notice_content,
+				#{item.createTime} AS create_time,
+				#{item.updateTime} AS update_time,
+				#{item.status} AS status,
+			) t
+			ON (notice.kh = t.kh)
+			WHEN MATCHED THEN UPDATE SET
+				title = t.title,
+				group_id = t.group_id,
+				notice_content = t.notice_content,
+				create_time = t.create_time,
+				update_time = t.update_time,
+				status = t.status,
+			WHEN NOT MATCHED THEN INSERT (
+				title, group_id, notice_content, create_time, update_time, status
+			) VALUES (
+				t.title, t.group_id, t.notice_content, t.create_time, t.update_time, t.status
+			)
+		</foreach>
+	</update>
+	<!-- opengauss end -->
+
+
+	<!--According Id select-->
+	<select id="selectById" resultMap="base_result_map">
+		select <include refid="base_column_list"/> from notice where id=#{id}
+	</select>
+
+	<!--According Id update-->
+	<update id="updateById" parameterType="com.project.entity.po.Notice">
+		update notice
+		<set>
+			<if test="bean.id!= null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.title!= null">
+				title = #{bean.title},
+			</if>
+			<if test="bean.groupId!= null">
+				group_id = #{bean.groupId},
+			</if>
+			<if test="bean.noticeContent!= null">
+				notice_content = #{bean.noticeContent},
+			</if>
+			<if test="bean.createTime!= null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.updateTime!= null">
+				update_time = #{bean.updateTime},
+			</if>
+			<if test="bean.status!= null">
+				status = #{bean.status},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--According Id delete-->
+	<delete id="deleteById">
+		delete from notice where id=#{id}
+	</delete>
+
+
+
+	<!-- According to any params update -->
+	<update id="updateByParam" parameterType="com.project.entity.query.NoticeQuery">
+		UPDATE notice
+		<set>
+			<if test="bean.id!=null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.title!=null">
+				title = #{bean.title},
+			</if>
+			<if test="bean.groupId!=null">
+				group_id = #{bean.groupId},
+			</if>
+			<if test="bean.noticeContent!=null">
+				notice_content = #{bean.noticeContent},
+			</if>
+			<if test="bean.createTime!=null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.updateTime!=null">
+				update_time = #{bean.updateTime},
+			</if>
+			<if test="bean.status!=null">
+				status = #{bean.status},
+			</if>
+		</set>
+		<include refid="query_condition"/>
+ 	</update>
+</mapper>

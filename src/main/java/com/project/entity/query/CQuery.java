@@ -5,36 +5,36 @@ package com.project.entity.query;
 /**
  * @Description:null query object
  * @author:null
- * @Date:2025/05/12
+ * @Date:2025/05/16
  */
 
 public class CQuery extends BaseQuery {
 	/**
-	 * 
+	 * 课号
 	 */
 	private String kh;
 
 	private String khFuzzy;
 
 	/**
-	 * 
+	 * 课名
 	 */
 	private String km;
 
 	private String kmFuzzy;
 
 	/**
-	 * 
+	 * 学分
 	 */
 	private Integer xf;
 
 	/**
-	 * 
+	 * 学时
 	 */
 	private Integer xs;
 
 	/**
-	 * 
+	 * 院系号
 	 */
 	private String yxh;
 

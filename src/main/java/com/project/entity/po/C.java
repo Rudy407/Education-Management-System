@@ -3,35 +3,37 @@ package com.project.entity.po;
 import java.io.Serializable;
 
 
+
+
 /**
  * @Description:null
  * @author:null
- * @Date:2025/05/09
+ * @Date:2025/05/16
  */
 
 public class C implements Serializable {
 	/**
-	 * 
+	 * 课号
 	 */
 	private String kh;
 
 	/**
-	 * 
+	 * 课名
 	 */
 	private String km;
 
 	/**
-	 * 
+	 * 学分
 	 */
 	private Integer xf;
 
 	/**
-	 * 
+	 * 学时
 	 */
 	private Integer xs;
 
 	/**
-	 * 
+	 * 院系号
 	 */
 	private String yxh;
 
@@ -72,6 +74,6 @@ public class C implements Serializable {
 
 	@Override
 	public String toString() {
-		return "null: " + (kh == null ? "null" : kh)  + ", null: " + (km == null ? "null" : km)  + ", null: " + (xf == null ? "null" : xf)  + ", null: " + (xs == null ? "null" : xs)  + ", null: " + (yxh == null ? "null" : yxh) ;
+		return "课号: " + (kh == null ? "null" : kh)  + ", 课名: " + (km == null ? "null" : km)  + ", 学分: " + (xf == null ? "null" : xf)  + ", 学时: " + (xs == null ? "null" : xs)  + ", 院系号: " + (yxh == null ? "null" : yxh) ;
 	}
 }

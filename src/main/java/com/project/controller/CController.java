@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @Description:nullController
  * @author:null
- * @Date:2025/05/12
+ * @Date:2025/05/16
  */
 
 @RestController
@@ -26,53 +26,57 @@ public class CController extends ABaseController {
 	public ResponseVO loadDataList(CQuery query) {
 		return getSuccessResponseVO(cService.findListByPage(query));
 	}
+
+	@RequestMapping("updateCourse")
+	public ResponseVO updateCourse(@RequestBody C c) {
+		return getSuccessResponseVO(cService.updateCByKh(c,c.getKh()));
+	}
+	@RequestMapping("deleteCourse")
+	public ResponseVO deleteCourse(@RequestBody C c) {
+		return getSuccessResponseVO(cService.deleteCByKh(c.getKh()));
+	}
+
 	/**
 	 * add 
 	 */
 	@RequestMapping("add")
-	public ResponseVO add(C bean) {
-		this.cService.add(bean);
-		return getSuccessResponseVO(null);
+	public ResponseVO add(@RequestBody C bean) {
+		return getSuccessResponseVO(cService.add(bean));
 	}
 	/**
 	 * add batch 
 	 */
 	@RequestMapping("addBatch")
 	public ResponseVO addBatch(@RequestBody List<C> listBean) {
-		this.cService.addBatch(listBean);
-		return getSuccessResponseVO(null);
+		return getSuccessResponseVO(cService.addBatch(listBean));
 	}
 	/**
 	 * add or update batch 
 	 */
 	@RequestMapping("addOrUpdateBatch")
 	public ResponseVO addOrUpdateBatch(@RequestBody List<C> listBean) {
-		this.cService.addOrUpdateBatch(listBean);
-		return getSuccessResponseVO(null);
+		return getSuccessResponseVO(cService.addOrUpdateBatch(listBean));
 	}
 	/**
 	 * 根据Kh查询
 	 */
 	@RequestMapping("getCByKh")
 	public ResponseVO getCByKh(String kh) {
-		this.cService.getCByKh(kh);
-		return getSuccessResponseVO(null);
+		return getSuccessResponseVO(cService.getCByKh(kh));
 	}
 	/**
 	 * 根据Kh更新
 	 */
 	@RequestMapping("updateCByKh")
 	public ResponseVO updateCByKh(C bean, String kh) {
-		this.cService.updateCByKh(bean, kh);
-		return getSuccessResponseVO(null);
+		return getSuccessResponseVO(cService.updateCByKh(bean, kh));
 	}
 	/**
 	 * 根据Kh删除
 	 */
 	@RequestMapping("deleteCByKh")
 	public ResponseVO deleteCByKh(String kh) {
-		this.cService.deleteCByKh(kh);
-		return getSuccessResponseVO(null);
+		return getSuccessResponseVO(cService.deleteCByKh(kh));
 	}
 
 }

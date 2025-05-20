@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.mappers.UserInfoMappers">
+	<!-- entity map -->
+	<resultMap id="base_result_map" type="com.project.entity.po.UserInfo">
+		<!-- null -->
+		<result column="id" property="id"/>
+		<!-- null -->
+		<result column="uid" property="uid"/>
+		<!-- null -->
+		<result column="password" property="password"/>
+		<!-- null -->
+		<result column="user_group" property="userGroup"/>
+		<!-- null -->
+		<result column="code" property="code"/>
+		<!-- null -->
+		<result column="user_name" property="userName"/>
+	</resultMap>
+
+	<!-- general query list -->
+	<sql id="base_column_list">
+		id,uid,password,user_group,code,user_name
+	</sql>
+
+	<!--Basic Query Condition-->
+	<sql id="base_query_condition">
+		<if test="query.id!=null">
+			and id = #{query.id}
+		</if>
+		<if test="query.uid!=null and query.uid!=''">
+			and uid = #{query.uid}
+		</if>
+		<if test="query.password!=null and query.password!=''">
+			and password = #{query.password}
+		</if>
+		<if test="query.userGroup!=null and query.userGroup!=''">
+			and user_group = #{query.userGroup}
+		</if>
+		<if test="query.code!=null and query.code!=''">
+			and code = #{query.code}
+		</if>
+		<if test="query.userName!=null and query.userName!=''">
+			and user_name = #{query.userName}
+		</if>
+	</sql>
+
+	<!--Extend Query Condition-->
+	<sql id="base_query_condition_extend">
+		<if test="query.uidFuzzy != null and query.uidFuzzy!=''">
+			and uid like concat('%', #{query.uidFuzzy}, '%')
+		</if>
+		<if test="query.passwordFuzzy != null and query.passwordFuzzy!=''">
+			and password like concat('%', #{query.passwordFuzzy}, '%')
+		</if>
+		<if test="query.userGroupFuzzy != null and query.userGroupFuzzy!=''">
+			and user_group like concat('%', #{query.userGroupFuzzy}, '%')
+		</if>
+		<if test="query.codeFuzzy != null and query.codeFuzzy!=''">
+			and code like concat('%', #{query.codeFuzzy}, '%')
+		</if>
+		<if test="query.userNameFuzzy != null and query.userNameFuzzy!=''">
+			and user_name like concat('%', #{query.userNameFuzzy}, '%')
+		</if>
+	</sql>
+	<!-- 通用的查询条件 -->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+
+	<select id="selectList" resultMap="base_result_map">
+		SELECT <include refid="base_column_list"/> FROM user_info
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+		<if test="query.orderBy!=null">order by ${query.orderBy}</if>
+		<if test="query.simplePage!=null">limit #{query.simplePage.countTotal} offset #{query.simplePage.start}</if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="integer">
+		SELECT count(1) FROM user_info <include refid="query_condition"/>
+	</select>
+
+	<!-- 插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.project.entity.po.UserInfo">
+		INSERT INTO user_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				id,
+			</if>
+			<if test="bean.uid!=null">
+				uid,
+			</if>
+			<if test="bean.password!=null">
+				password,
+			</if>
+			<if test="bean.userGroup!=null">
+				user_group,
+			</if>
+			<if test="bean.code!=null">
+				code,
+			</if>
+			<if test="bean.userName!=null">
+				user_name,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				#{bean.id},
+			</if>
+			<if test="bean.uid!=null">
+				#{bean.uid},
+			</if>
+			<if test="bean.password!=null">
+				#{bean.password},
+			</if>
+			<if test="bean.userGroup!=null">
+				#{bean.userGroup},
+			</if>
+			<if test="bean.code!=null">
+				#{bean.code},
+			</if>
+			<if test="bean.userName!=null">
+				#{bean.userName},
+			</if>
+		</trim>
+	</insert>
+
+	<!-- opengauss start -->
+	<!-- 插入或更新（兼容OpenGauss/PostgreSQL MERGE语法）-->
+	<update id="insertOrUpdate" parameterType="com.project.entity.po.UserInfo">
+		MERGE INTO user_info USING (
+			<trim prefix="SELECT" suffixOverrides=",">
+				<if test="bean.id != null">
+					#{bean.id} AS id,
+				</if>
+				<if test="bean.uid != null">
+					#{bean.uid} AS uid,
+				</if>
+				<if test="bean.password != null">
+					#{bean.password} AS password,
+				</if>
+				<if test="bean.userGroup != null">
+					#{bean.userGroup} AS user_group,
+				</if>
+				<if test="bean.code != null">
+					#{bean.code} AS code,
+				</if>
+				<if test="bean.userName != null">
+					#{bean.userName} AS user_name,
+				</if>
+			</trim>
+		) t ON (user_info.kh = t.kh)
+		WHEN MATCHED THEN UPDATE SET
+			<trim suffixOverrides=",">
+				<if test="bean.id != null">
+					id = t.id,
+				</if>
+				<if test="bean.uid != null">
+					uid = t.uid,
+				</if>
+				<if test="bean.password != null">
+					password = t.password,
+				</if>
+				<if test="bean.userGroup != null">
+					user_group = t.user_group,
+				</if>
+				<if test="bean.code != null">
+					code = t.code,
+				</if>
+				<if test="bean.userName != null">
+					user_name = t.user_name,
+				</if>
+			</trim>
+		WHEN NOT MATCHED THEN INSERT
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="bean.id != null">
+					id,
+				</if>
+				<if test="bean.uid != null">
+					uid,
+				</if>
+				<if test="bean.password != null">
+					password,
+				</if>
+				<if test="bean.userGroup != null">
+					user_group,
+				</if>
+				<if test="bean.code != null">
+					code,
+				</if>
+				<if test="bean.userName != null">
+					user_name,
+				</if>
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="bean.id != null">
+					t.id,
+				</if>
+				<if test="bean.uid != null">
+					t.uid,
+				</if>
+				<if test="bean.password != null">
+					t.password,
+				</if>
+				<if test="bean.userGroup != null">
+					t.user_group,
+				</if>
+				<if test="bean.code != null">
+					t.code,
+				</if>
+				<if test="bean.userName != null">
+					t.user_name,
+				</if>
+			</trim>
+	</update>
+	<!-- opengauss end-->
+
+	<!-- 批量插入 -->
+	<insert id="insertBatch" parameterType="com.project.entity.po.UserInfo">
+		INSERT INTO user_info(uid,password,user_group,code,user_name) values
+		<foreach collection="list" item="item" separator="," open="(" close=")">
+			#{item.uid},#{item.password},#{item.userGroup},#{item.code},#{item.userName}
+		</foreach>
+	</insert>
+
+	<!-- opengauss start -->	<!-- 批量插入或更新 -->
+	<update id="insertOrUpdateBatch" parameterType="java.util.List">
+		<foreach collection="list" item="item" separator=";">
+			MERGE INTO user_info USING (
+			SELECT
+				#{item.uid} AS uid,
+				#{item.password} AS password,
+				#{item.userGroup} AS user_group,
+				#{item.code} AS code,
+				#{item.userName} AS user_name,
+			) t
+			ON (user_info.kh = t.kh)
+			WHEN MATCHED THEN UPDATE SET
+				uid = t.uid,
+				password = t.password,
+				user_group = t.user_group,
+				code = t.code,
+				user_name = t.user_name,
+			WHEN NOT MATCHED THEN INSERT (
+				uid, password, user_group, code, user_name
+			) VALUES (
+				t.uid, t.password, t.user_group, t.code, t.user_name
+			)
+		</foreach>
+	</update>
+	<!-- opengauss end -->
+
+
+	<!--According Id select-->
+	<select id="selectById" resultMap="base_result_map">
+		select <include refid="base_column_list"/> from user_info where id=#{id}
+	</select>
+
+	<!--According Id update-->
+	<update id="updateById" parameterType="com.project.entity.po.UserInfo">
+		update user_info
+		<set>
+			<if test="bean.id!= null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.uid!= null">
+				uid = #{bean.uid},
+			</if>
+			<if test="bean.password!= null">
+				password = #{bean.password},
+			</if>
+			<if test="bean.userGroup!= null">
+				user_group = #{bean.userGroup},
+			</if>
+			<if test="bean.code!= null">
+				code = #{bean.code},
+			</if>
+			<if test="bean.userName!= null">
+				user_name = #{bean.userName},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--According Id delete-->
+	<delete id="deleteById">
+		delete from user_info where id=#{id}
+	</delete>
+
+	<!--According Uid select-->
+	<select id="selectByUid" resultMap="base_result_map">
+		select <include refid="base_column_list"/> from user_info where uid=#{uid}
+	</select>
+
+	<!--According Uid update-->
+	<update id="updateByUid" parameterType="com.project.entity.po.UserInfo">
+		update user_info
+		<set>
+			<if test="bean.id!= null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.uid!= null">
+				uid = #{bean.uid},
+			</if>
+			<if test="bean.password!= null">
+				password = #{bean.password},
+			</if>
+			<if test="bean.userGroup!= null">
+				user_group = #{bean.userGroup},
+			</if>
+			<if test="bean.code!= null">
+				code = #{bean.code},
+			</if>
+			<if test="bean.userName!= null">
+				user_name = #{bean.userName},
+			</if>
+		</set>
+		where uid=#{uid}
+	</update>
+
+	<!--According Uid delete-->
+	<delete id="deleteByUid">
+		delete from user_info where uid=#{uid}
+	</delete>
+
+
+
+	<!-- According to any params update -->
+	<update id="updateByParam" parameterType="com.project.entity.query.UserInfoQuery">
+		UPDATE user_info
+		<set>
+			<if test="bean.id!=null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.uid!=null">
+				uid = #{bean.uid},
+			</if>
+			<if test="bean.password!=null">
+				password = #{bean.password},
+			</if>
+			<if test="bean.userGroup!=null">
+				user_group = #{bean.userGroup},
+			</if>
+			<if test="bean.code!=null">
+				code = #{bean.code},
+			</if>
+			<if test="bean.userName!=null">
+				user_name = #{bean.userName},
+			</if>
+		</set>
+		<include refid="query_condition"/>
+ 	</update>
+</mapper>

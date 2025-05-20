@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.mappers.TMappers">
+	<!-- entity map -->
+	<resultMap id="base_result_map" type="com.project.entity.po.T">
+		<!-- 工号 -->
+		<result column="gh" property="gh"/>
+		<!-- 姓名 -->
+		<result column="xm" property="xm"/>
+		<!-- 性别 -->
+		<result column="xb" property="xb"/>
+		<!-- 出生日期 -->
+		<result column="csrq" property="csrq"/>
+		<!-- 职称 -->
+		<result column="zc" property="zc"/>
+		<!-- 院系号 -->
+		<result column="yxh" property="yxh"/>
+	</resultMap>
+
+	<!-- general query list -->
+	<sql id="base_column_list">
+		gh,xm,xb,csrq,zc,yxh
+	</sql>
+
+	<!--Basic Query Condition-->
+	<sql id="base_query_condition">
+		<if test="query.gh!=null and query.gh!=''">
+			and gh = #{query.gh}
+		</if>
+		<if test="query.xm!=null and query.xm!=''">
+			and xm = #{query.xm}
+		</if>
+		<if test="query.xb!=null and query.xb!=''">
+			and xb = #{query.xb}
+		</if>
+		<if test="query.csrq!=null">
+			and csrq = #{query.csrq}
+		</if>
+		<if test="query.zc!=null and query.zc!=''">
+			and zc = #{query.zc}
+		</if>
+		<if test="query.yxh!=null and query.yxh!=''">
+			and yxh = #{query.yxh}
+		</if>
+	</sql>
+
+	<!--Extend Query Condition-->
+	<sql id="base_query_condition_extend">
+		<if test="query.ghFuzzy != null and query.ghFuzzy!=''">
+			and gh like concat('%', #{query.ghFuzzy}, '%')
+		</if>
+		<if test="query.xmFuzzy != null and query.xmFuzzy!=''">
+			and xm like concat('%', #{query.xmFuzzy}, '%')
+		</if>
+		<if test="query.xbFuzzy != null and query.xbFuzzy!=''">
+			and xb like concat('%', #{query.xbFuzzy}, '%')
+		</if>
+		<if test="query.csrqStart != null and query.csrqStart!=''">
+			<![CDATA[ and csrq >= str_to_date(#{query.csrqStart}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.csrqEnd != null and query.csrqEnd!=''">
+			<![CDATA[ and csrq < date_sub(str_to_date(#{query.csrqEnd},'%Y-%m-%d'),interval -1 day) ]]>
+		</if>
+		<if test="query.zcFuzzy != null and query.zcFuzzy!=''">
+			and zc like concat('%', #{query.zcFuzzy}, '%')
+		</if>
+		<if test="query.yxhFuzzy != null and query.yxhFuzzy!=''">
+			and yxh like concat('%', #{query.yxhFuzzy}, '%')
+		</if>
+	</sql>
+	<!-- 通用的查询条件 -->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+
+	<select id="selectList" resultMap="base_result_map">
+		SELECT <include refid="base_column_list"/> FROM t
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+		<if test="query.orderBy!=null">order by ${query.orderBy}</if>
+		<if test="query.simplePage!=null">limit #{query.simplePage.countTotal} offset #{query.simplePage.start}</if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="integer">
+		SELECT count(1) FROM t <include refid="query_condition"/>
+	</select>
+
+	<!-- 插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.project.entity.po.T">
+		INSERT INTO t
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.gh!=null">
+				gh,
+			</if>
+			<if test="bean.xm!=null">
+				xm,
+			</if>
+			<if test="bean.xb!=null">
+				xb,
+			</if>
+			<if test="bean.csrq!=null">
+				csrq,
+			</if>
+			<if test="bean.zc!=null">
+				zc,
+			</if>
+			<if test="bean.yxh!=null">
+				yxh,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.gh!=null">
+				#{bean.gh},
+			</if>
+			<if test="bean.xm!=null">
+				#{bean.xm},
+			</if>
+			<if test="bean.xb!=null">
+				#{bean.xb},
+			</if>
+			<if test="bean.csrq!=null">
+				#{bean.csrq},
+			</if>
+			<if test="bean.zc!=null">
+				#{bean.zc},
+			</if>
+			<if test="bean.yxh!=null">
+				#{bean.yxh},
+			</if>
+		</trim>
+	</insert>
+
+	<!-- opengauss start -->
+	<!-- 插入或更新（兼容OpenGauss/PostgreSQL MERGE语法）-->
+	<update id="insertOrUpdate" parameterType="com.project.entity.po.T">
+		MERGE INTO t USING (
+			<trim prefix="SELECT" suffixOverrides=",">
+				<if test="bean.gh != null">
+					#{bean.gh} AS gh,
+				</if>
+				<if test="bean.xm != null">
+					#{bean.xm} AS xm,
+				</if>
+				<if test="bean.xb != null">
+					#{bean.xb} AS xb,
+				</if>
+				<if test="bean.csrq != null">
+					#{bean.csrq} AS csrq,
+				</if>
+				<if test="bean.zc != null">
+					#{bean.zc} AS zc,
+				</if>
+				<if test="bean.yxh != null">
+					#{bean.yxh} AS yxh,
+				</if>
+			</trim>
+		) t ON (t.kh = t.kh)
+		WHEN MATCHED THEN UPDATE SET
+			<trim suffixOverrides=",">
+				<if test="bean.gh != null">
+					gh = t.gh,
+				</if>
+				<if test="bean.xm != null">
+					xm = t.xm,
+				</if>
+				<if test="bean.xb != null">
+					xb = t.xb,
+				</if>
+				<if test="bean.csrq != null">
+					csrq = t.csrq,
+				</if>
+				<if test="bean.zc != null">
+					zc = t.zc,
+				</if>
+				<if test="bean.yxh != null">
+					yxh = t.yxh,
+				</if>
+			</trim>
+		WHEN NOT MATCHED THEN INSERT
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="bean.gh != null">
+					gh,
+				</if>
+				<if test="bean.xm != null">
+					xm,
+				</if>
+				<if test="bean.xb != null">
+					xb,
+				</if>
+				<if test="bean.csrq != null">
+					csrq,
+				</if>
+				<if test="bean.zc != null">
+					zc,
+				</if>
+				<if test="bean.yxh != null">
+					yxh,
+				</if>
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="bean.gh != null">
+					t.gh,
+				</if>
+				<if test="bean.xm != null">
+					t.xm,
+				</if>
+				<if test="bean.xb != null">
+					t.xb,
+				</if>
+				<if test="bean.csrq != null">
+					t.csrq,
+				</if>
+				<if test="bean.zc != null">
+					t.zc,
+				</if>
+				<if test="bean.yxh != null">
+					t.yxh,
+				</if>
+			</trim>
+	</update>
+	<!-- opengauss end-->
+
+	<!-- 批量插入 -->
+	<insert id="insertBatch" parameterType="com.project.entity.po.T">
+		INSERT INTO t(gh,xm,xb,csrq,zc,yxh) values
+		<foreach collection="list" item="item" separator="," open="(" close=")">
+			#{item.gh},#{item.xm},#{item.xb},#{item.csrq},#{item.zc},#{item.yxh}
+		</foreach>
+	</insert>
+
+	<!-- opengauss start -->	<!-- 批量插入或更新 -->
+	<update id="insertOrUpdateBatch" parameterType="java.util.List">
+		<foreach collection="list" item="item" separator=";">
+			MERGE INTO t USING (
+			SELECT
+				#{item.gh} AS gh,
+				#{item.xm} AS xm,
+				#{item.xb} AS xb,
+				#{item.csrq} AS csrq,
+				#{item.zc} AS zc,
+				#{item.yxh} AS yxh,
+			) t
+			ON (t.kh = t.kh)
+			WHEN MATCHED THEN UPDATE SET
+				gh = t.gh,
+				xm = t.xm,
+				xb = t.xb,
+				csrq = t.csrq,
+				zc = t.zc,
+				yxh = t.yxh,
+			WHEN NOT MATCHED THEN INSERT (
+				gh, xm, xb, csrq, zc, yxh
+			) VALUES (
+				t.gh, t.xm, t.xb, t.csrq, t.zc, t.yxh
+			)
+		</foreach>
+	</update>
+	<!-- opengauss end -->
+
+
+	<!--According Gh select-->
+	<select id="selectByGh" resultMap="base_result_map">
+		select <include refid="base_column_list"/> from t where gh=#{gh}
+	</select>
+
+	<!--According Gh update-->
+	<update id="updateByGh" parameterType="com.project.entity.po.T">
+		update t
+		<set>
+			<if test="bean.gh!= null">
+				gh = #{bean.gh},
+			</if>
+			<if test="bean.xm!= null">
+				xm = #{bean.xm},
+			</if>
+			<if test="bean.xb!= null">
+				xb = #{bean.xb},
+			</if>
+			<if test="bean.csrq!= null">
+				csrq = #{bean.csrq},
+			</if>
+			<if test="bean.zc!= null">
+				zc = #{bean.zc},
+			</if>
+			<if test="bean.yxh!= null">
+				yxh = #{bean.yxh},
+			</if>
+		</set>
+		where gh=#{gh}
+	</update>
+
+	<!--According Gh delete-->
+	<delete id="deleteByGh">
+		delete from t where gh=#{gh}
+	</delete>
+
+
+
+	<!-- According to any params update -->
+	<update id="updateByParam" parameterType="com.project.entity.query.TQuery">
+		UPDATE t
+		<set>
+			<if test="bean.gh!=null">
+				gh = #{bean.gh},
+			</if>
+			<if test="bean.xm!=null">
+				xm = #{bean.xm},
+			</if>
+			<if test="bean.xb!=null">
+				xb = #{bean.xb},
+			</if>
+			<if test="bean.csrq!=null">
+				csrq = #{bean.csrq},
+			</if>
+			<if test="bean.zc!=null">
+				zc = #{bean.zc},
+			</if>
+			<if test="bean.yxh!=null">
+				yxh = #{bean.yxh},
+			</if>
+		</set>
+		<include refid="query_condition"/>
+ 	</update>
+</mapper>

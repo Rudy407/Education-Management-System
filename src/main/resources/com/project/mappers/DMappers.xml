@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.mappers.DMappers">
+	<!-- entity map -->
+	<resultMap id="base_result_map" type="com.project.entity.po.D">
+		<!-- null -->
+		<result column="yxh" property="yxh"/>
+		<!-- 名称 -->
+		<result column="mc" property="mc"/>
+		<!-- 地址 -->
+		<result column="dz" property="dz"/>
+		<!-- 联系电话 -->
+		<result column="lxdh" property="lxdh"/>
+	</resultMap>
+
+	<!-- general query list -->
+	<sql id="base_column_list">
+		yxh,mc,dz,lxdh
+	</sql>
+
+	<!--Basic Query Condition-->
+	<sql id="base_query_condition">
+		<if test="query.yxh!=null and query.yxh!=''">
+			and yxh = #{query.yxh}
+		</if>
+		<if test="query.mc!=null and query.mc!=''">
+			and mc = #{query.mc}
+		</if>
+		<if test="query.dz!=null and query.dz!=''">
+			and dz = #{query.dz}
+		</if>
+		<if test="query.lxdh!=null and query.lxdh!=''">
+			and lxdh = #{query.lxdh}
+		</if>
+	</sql>
+
+	<!--Extend Query Condition-->
+	<sql id="base_query_condition_extend">
+		<if test="query.yxhFuzzy != null and query.yxhFuzzy!=''">
+			and yxh like concat('%', #{query.yxhFuzzy}, '%')
+		</if>
+		<if test="query.mcFuzzy != null and query.mcFuzzy!=''">
+			and mc like concat('%', #{query.mcFuzzy}, '%')
+		</if>
+		<if test="query.dzFuzzy != null and query.dzFuzzy!=''">
+			and dz like concat('%', #{query.dzFuzzy}, '%')
+		</if>
+		<if test="query.lxdhFuzzy != null and query.lxdhFuzzy!=''">
+			and lxdh like concat('%', #{query.lxdhFuzzy}, '%')
+		</if>
+	</sql>
+	<!-- 通用的查询条件 -->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+
+	<select id="selectList" resultMap="base_result_map">
+		SELECT <include refid="base_column_list"/> FROM d
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+		<if test="query.orderBy!=null">order by ${query.orderBy}</if>
+		<if test="query.simplePage!=null">limit #{query.simplePage.countTotal} offset #{query.simplePage.start}</if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="integer">
+		SELECT count(1) FROM d <include refid="query_condition"/>
+	</select>
+
+	<!-- 插入（匹配有值的字段）-->
+	<insert id="insert" parameterType="com.project.entity.po.D">
+		INSERT INTO d
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.yxh!=null">
+				yxh,
+			</if>
+			<if test="bean.mc!=null">
+				mc,
+			</if>
+			<if test="bean.dz!=null">
+				dz,
+			</if>
+			<if test="bean.lxdh!=null">
+				lxdh,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.yxh!=null">
+				#{bean.yxh},
+			</if>
+			<if test="bean.mc!=null">
+				#{bean.mc},
+			</if>
+			<if test="bean.dz!=null">
+				#{bean.dz},
+			</if>
+			<if test="bean.lxdh!=null">
+				#{bean.lxdh},
+			</if>
+		</trim>
+	</insert>
+
+	<!-- opengauss start -->
+	<!-- 插入或更新（兼容OpenGauss/PostgreSQL MERGE语法）-->
+	<update id="insertOrUpdate" parameterType="com.project.entity.po.D">
+		MERGE INTO d USING (
+			<trim prefix="SELECT" suffixOverrides=",">
+				<if test="bean.yxh != null">
+					#{bean.yxh} AS yxh,
+				</if>
+				<if test="bean.mc != null">
+					#{bean.mc} AS mc,
+				</if>
+				<if test="bean.dz != null">
+					#{bean.dz} AS dz,
+				</if>
+				<if test="bean.lxdh != null">
+					#{bean.lxdh} AS lxdh,
+				</if>
+			</trim>
+		) t ON (d.kh = t.kh)
+		WHEN MATCHED THEN UPDATE SET
+			<trim suffixOverrides=",">
+				<if test="bean.yxh != null">
+					yxh = t.yxh,
+				</if>
+				<if test="bean.mc != null">
+					mc = t.mc,
+				</if>
+				<if test="bean.dz != null">
+					dz = t.dz,
+				</if>
+				<if test="bean.lxdh != null">
+					lxdh = t.lxdh,
+				</if>
+			</trim>
+		WHEN NOT MATCHED THEN INSERT
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="bean.yxh != null">
+					yxh,
+				</if>
+				<if test="bean.mc != null">
+					mc,
+				</if>
+				<if test="bean.dz != null">
+					dz,
+				</if>
+				<if test="bean.lxdh != null">
+					lxdh,
+				</if>
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="bean.yxh != null">
+					t.yxh,
+				</if>
+				<if test="bean.mc != null">
+					t.mc,
+				</if>
+				<if test="bean.dz != null">
+					t.dz,
+				</if>
+				<if test="bean.lxdh != null">
+					t.lxdh,
+				</if>
+			</trim>
+	</update>
+	<!-- opengauss end-->
+
+	<!-- 批量插入 -->
+	<insert id="insertBatch" parameterType="com.project.entity.po.D">
+		INSERT INTO d(yxh,mc,dz,lxdh) values
+		<foreach collection="list" item="item" separator="," open="(" close=")">
+			#{item.yxh},#{item.mc},#{item.dz},#{item.lxdh}
+		</foreach>
+	</insert>
+
+	<!-- opengauss start -->	<!-- 批量插入或更新 -->
+	<update id="insertOrUpdateBatch" parameterType="java.util.List">
+		<foreach collection="list" item="item" separator=";">
+			MERGE INTO d USING (
+			SELECT
+				#{item.yxh} AS yxh,
+				#{item.mc} AS mc,
+				#{item.dz} AS dz,
+				#{item.lxdh} AS lxdh,
+			) t
+			ON (d.kh = t.kh)
+			WHEN MATCHED THEN UPDATE SET
+				yxh = t.yxh,
+				mc = t.mc,
+				dz = t.dz,
+				lxdh = t.lxdh,
+			WHEN NOT MATCHED THEN INSERT (
+				yxh, mc, dz, lxdh
+			) VALUES (
+				t.yxh, t.mc, t.dz, t.lxdh
+			)
+		</foreach>
+	</update>
+	<!-- opengauss end -->
+
+
+	<!--According Yxh select-->
+	<select id="selectByYxh" resultMap="base_result_map">
+		select <include refid="base_column_list"/> from d where yxh=#{yxh}
+	</select>
+
+	<!--According Yxh update-->
+	<update id="updateByYxh" parameterType="com.project.entity.po.D">
+		update d
+		<set>
+			<if test="bean.yxh!= null">
+				yxh = #{bean.yxh},
+			</if>
+			<if test="bean.mc!= null">
+				mc = #{bean.mc},
+			</if>
+			<if test="bean.dz!= null">
+				dz = #{bean.dz},
+			</if>
+			<if test="bean.lxdh!= null">
+				lxdh = #{bean.lxdh},
+			</if>
+		</set>
+		where yxh=#{yxh}
+	</update>
+
+	<!--According Yxh delete-->
+	<delete id="deleteByYxh">
+		delete from d where yxh=#{yxh}
+	</delete>
+
+
+
+	<!-- According to any params update -->
+	<update id="updateByParam" parameterType="com.project.entity.query.DQuery">
+		UPDATE d
+		<set>
+			<if test="bean.yxh!=null">
+				yxh = #{bean.yxh},
+			</if>
+			<if test="bean.mc!=null">
+				mc = #{bean.mc},
+			</if>
+			<if test="bean.dz!=null">
+				dz = #{bean.dz},
+			</if>
+			<if test="bean.lxdh!=null">
+				lxdh = #{bean.lxdh},
+			</if>
+		</set>
+		<include refid="query_condition"/>
+ 	</update>
+</mapper>

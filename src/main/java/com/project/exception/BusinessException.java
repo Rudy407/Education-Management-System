@@ -1,13 +1,9 @@
 package com.project.exception;
+
 import com.project.entity.enums.ResponseCodeEnum;
-
-
-public class BusinessException extends RuntimeException {
-
+public class BusinessException extends Exception {
     private ResponseCodeEnum codeEnum;
-
     private Integer code;
-
     private String message;
 
     public BusinessException(String message, Throwable e) {
@@ -40,19 +36,14 @@ public class BusinessException extends RuntimeException {
     public ResponseCodeEnum getCodeEnum() {
         return codeEnum;
     }
-
     public Integer getCode() {
         return code;
     }
-
     @Override
     public String getMessage() {
         return message;
     }
 
-    /**
-     * 重写fillInStackTrace 业务异常不需要堆栈信息，提高效率.
-     */
     @Override
     public Throwable fillInStackTrace() {
         return this;

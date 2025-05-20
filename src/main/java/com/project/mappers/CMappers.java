@@ -1,14 +1,13 @@
 package com.project.mappers;
 
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 /**
  * @Description:nullMapper
  * @author:null
- * @Date:2025/05/12
+ * @Date:2025/05/16
  */
-@Mapper
+
 public interface CMappers<T, P> extends BaseMapper {
 	/**
 	 * select by Kh
